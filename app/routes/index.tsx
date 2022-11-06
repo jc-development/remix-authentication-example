@@ -10,6 +10,7 @@ interface Quote {
   id: string;
 };
 
+// get data, so maybe can get a session cookie here
 export const loader = async () => {
   return json({
     quotes: await db.quote.findMany()
