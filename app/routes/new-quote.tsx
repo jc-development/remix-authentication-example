@@ -2,6 +2,8 @@ import type { ActionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { db } from '~/utils/db.server';
 
+// Called for POST, PATCH, PUT, DELETE HTTP methods
+//  and used to used to edit or mutate data.
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
   const by = form.get('by');
