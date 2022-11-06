@@ -1,6 +1,10 @@
 node_modules
+.output
+.cache
 
 /.cache
 /build
 /public/build
+/api/index.js
+
 .env

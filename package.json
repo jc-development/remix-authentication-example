@@ -1,6 +1,9 @@
 {
   "private": true,
   "sideEffects": false,
+  "prisma": {
+    "seed": "node --require esbuild-register prisma/seed.ts"
+  },
   "scripts": {
     "build": "npm run buld:css && remix build",
     "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
@@ -9,6 +12,7 @@
     "start": "remix-serve build"
   },
   "dependencies": {
+    "@prisma/client": "^4.5.0",
     "@remix-run/node": "^1.7.5",
     "@remix-run/react": "^1.7.5",
     "@remix-run/serve": "^1.7.5",
@@ -23,8 +27,10 @@
     "@types/react-dom": "^18.0.6",
     "autoprefixer": "^10.4.13",
     "concurrently": "^7.5.0",
+    "esbuild-register": "^3.3.3",
     "eslint": "^8.23.1",
     "postcss": "^8.4.18",
+    "prisma": "^4.5.0",
     "tailwindcss": "^3.2.2",
     "typescript": "^4.7.4"
   },
