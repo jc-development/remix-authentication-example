@@ -1,28 +1,18 @@
 import { Link, useLoaderData } from '@remix-run/react';
 import { json } from '@remix-run/node';
-import { Key } from 'react';
+import type { Key } from 'react';
+
+import { db } from '~/utils/db.server';
 
 interface Quote {
   quote: string;
-  by: string
+  by: string;
+  id: string;
 };
 
 export const loader = async () => {
   return json({
-    quotes: [
-      {
-        quote: 'Light at the end of the tunnel, dey don cut am.',
-        by: 'Brain Jotter'
-      },
-      {
-        quote: 'Promised to stand by you, we don sit down.',
-        by: 'Brain Jotter'
-      },
-      {
-        quote: 'Polythecnic wey dey in Italy, Napoli.',
-        by: 'Comrade with wisdom and Understanding'
-      }
-    ]
+    quotes: await db.quote.findMany()
   });
 };
 
@@ -35,9 +25,9 @@ export default function Index() {
         <div className="grid lg:grid-flow-row grid-cols-1 lg:grid-cols-3">
           {
             quotes.map((q: Quote, i: Key | null | undefined) => {
-              const { quote, by } = q;
+              const { id, quote, by } = q;
               return (
-                <figure key={i} className="m-4 py-10 px-4 shadow-md shadow-sky-100">
+                <figure key={id} className="m-4 py-10 px-4 shadow-md shadow-sky-100">
                   <blockquote cite="https://wisdomman.com" className="py-3">
                     <p className="text-gray-800 text-xl">
                       {quote}
