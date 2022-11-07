@@ -1,3 +1,8 @@
+import {
+  createUserSession,
+  login,
+  register
+} from '~/utils/session.server';
 import type {
   ActionFunction,
   LinksFunction,
@@ -32,7 +37,73 @@ function validateUrl(url: any) {
   return "/";
 }
 
-const badRequest = (data: any) => json(data, { status: 400 })
+const badRequest = (data: any) => json(data, { status: 400 });
+
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData();
+  const loginType = form.get('loginType');
+  const username = form.get('username');
+  const password = form.get('password');
+  const redirectTo = validateUrl(form.get('redirectTo') || '/');
+
+  if (
+    typeof loginType !== 'string' ||
+    typeof username !== 'string' ||
+    typeof password !== 'string' ||
+    typeof redirectTo !== 'string'
+  ) {
+    return badRequest({ formError: 'Form not submitted correctly.' });
+  }
+
+  const fields = { loginType, username, password };
+  const fieldErrors = {
+    username: validateUsername(username),
+    password: validatePassword(password),
+  };
+
+  if (Object.values(fieldErrors).some(Boolean)) {
+    return badRequest({ fieldErrors, fields });
+  }
+  switch (loginType) {
+    case 'login': {
+      const user = await login({ username, password });
+      console.log({ user });
+      if (!user) {
+        return badRequest({
+          fields,
+          formError: 'Invalid username or password',
+        });
+      }
+      return createUserSession(user.id, redirectTo)
+    }
+    case 'register': {
+      const userExists = await db.user.findFirst({
+        where: { username },
+      });
+      if (userExists) {
+        return badRequest({
+          fields,
+          formError: `User with username ${username} already exists`,
+        });
+      }
+      const user = await register({ username, password });
+      if (!user) {
+        return badRequest({
+          fields,
+          formError: 'Something went wrong trying to create a new user',
+        });
+      }
+      return createUserSession(user.id, redirectTo);
+    }
+    default: {
+      return badRequest({
+        fields,
+        formError: 'Invalid login type',
+      });
+    }
+  }
+};
+
 
 const inputClassName = `w-full rounded border border-gray-500 px-2 py-1 text-lg text-purple-900 outline-purple-300 `;
 

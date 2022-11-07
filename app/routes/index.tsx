@@ -3,6 +3,7 @@ import { json } from '@remix-run/node';
 import type { Key } from 'react';
 
 import { db } from '~/utils/db.server';
+import { getUser } from '~/utils/session.server';
 
 interface Quote {
   quote: string;
@@ -11,14 +12,17 @@ interface Quote {
 };
 
 // get data, so maybe can get a session cookie here
-export const loader = async () => {
+export const loader = async ({ request }) => {
+  const user = await getUser(request);
+
   return json({
-    quotes: await db.quote.findMany()
+    quotes: await db.quote.findMany(),
+    user
   });
 };
 
 export default function Index() {
-  const { quotes } = useLoaderData();
+  const { quotes, user } = useLoaderData();
 
   return (
     <div>
@@ -47,10 +51,25 @@ export default function Index() {
         <div className="w-full max-w-screen-lg mx-auto flex justify-between content-center py-3">
           <Link className="text-white text-3xl font-bold" to={"/"}>Quote Wall</Link>
           <div className="flex flex-col md:flex-row items-center justify-between gap-x-4 text-blue-50">
-            <Link to={"login"}>Login</Link>
+            {
+              user ? (
+                <>
+                  <Link to={"new-quote"}>Add a Quote</Link>
+                  <form action="/logout" method="post">
+                    <button type="submit" className="button">Logout</button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link to={"login"}>Login</Link>
+                  <Link to={"login"}>Register</Link>
+                </>
+              )
+            }
+            {/* <Link to={"login"}>Login</Link>
             <Link to={"register"}>Register</Link>
             <Link to={"new-quote"}>Add A Quote</Link>
-            <Link to={"logout"}>Logout</Link>
+            <Link to={"logout"}>Logout</Link> */}
           </div>
         </div>
       </nav>
